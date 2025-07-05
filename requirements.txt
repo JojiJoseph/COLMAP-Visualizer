@@ -1,0 +1,4 @@
+git+https://github.com/JojiJoseph/pycolmap-scene-manager.git # To not conflict with python binding of colmap
+pyqt6
+moderngl
+numpy
