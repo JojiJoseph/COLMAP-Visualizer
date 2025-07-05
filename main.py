@@ -32,12 +32,9 @@ class MainWindow(QMainWindow):
         # Central widget with timer label and image
         central_widget = QWidget(self)
         layout = QVBoxLayout()
-        # self.label = QLabel("Elapsed time: 0 s", self)
-        # layout.addWidget(self.label)
+
         self.image_label = QLabel(self)
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        # Fill area but keep aspect ratio
-        # self.image_label.setScaledContents(True)
         layout.addWidget(self.image_label)
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
@@ -108,7 +105,6 @@ class MainWindow(QMainWindow):
         layout.addLayout(slider_layout)
 
         # Timer setup
-        self.elapsed_seconds = 0
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_timer)
         self.timer.start(10)  # 100 ms interval
@@ -145,6 +141,22 @@ class MainWindow(QMainWindow):
 
 def main(colmap_dir: str):
     app = QApplication(sys.argv)
+
+    app.setStyleSheet("""
+        QWidget {
+            background-color: #202124;
+            color: #E8EAED;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 11pt;
+        }
+        QSlider::handle:horizontal {
+            background: #1a73e8;
+        }
+        QLabel {
+            font-weight: bold;
+        }
+    """)
+    
     window = MainWindow(colmap_dir)
     window.show()
     sys.exit(app.exec())
