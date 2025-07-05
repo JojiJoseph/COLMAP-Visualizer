@@ -32,9 +32,12 @@ class MainWindow(QMainWindow):
         # Central widget with timer label and image
         central_widget = QWidget(self)
         layout = QVBoxLayout()
-        self.label = QLabel("Elapsed time: 0 s", self)
-        layout.addWidget(self.label)
+        # self.label = QLabel("Elapsed time: 0 s", self)
+        # layout.addWidget(self.label)
         self.image_label = QLabel(self)
+        self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # Fill area but keep aspect ratio
+        # self.image_label.setScaledContents(True)
         layout.addWidget(self.image_label)
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
@@ -110,11 +113,9 @@ class MainWindow(QMainWindow):
         self.timer.timeout.connect(self.update_timer)
         self.timer.start(10)  # 100 ms interval
     def update_timer(self):
-        self.elapsed_seconds += 1
-        self.label.setText(f"Elapsed time: {self.elapsed_seconds} s")
-        self.show_random_image()
+        self.render_point_cloud()
 
-    def show_random_image(self):
+    def render_point_cloud(self):
         K = np.array([[1000, 0, 320],
                           [0, 1000, 240],
                           [0, 0, 1]], dtype=np.float32)
@@ -130,13 +131,17 @@ class MainWindow(QMainWindow):
         rotation = scipy_transform.Rotation.from_euler('xyz', [roll, pitch, yaw], degrees=False)
         viewmat[:3, :3] = rotation.as_matrix()
 
-        arr = self.renderer.render(K, viewmat=viewmat, near=0.1, far=100.0)
-        arr = arr.copy()# / 255.0
-        # arr = np.random.randint(0, 256, (200, 200), dtype=np.uint8)
+        arr = self.renderer.render(K, viewmat=viewmat, near=0.1, far=100.0).copy()
         # Convert to QImage
         qimg = QImage(arr.data, arr.shape[1], arr.shape[0], arr.strides[0], QImage.Format.Format_RGB888)
         pixmap = QPixmap.fromImage(qimg)
-        self.image_label.setPixmap(pixmap)
+        scaled_pixmap = pixmap.scaled(
+        self.image_label.size(),
+        Qt.AspectRatioMode.KeepAspectRatio,
+        Qt.TransformationMode.SmoothTransformation
+)
+
+        self.image_label.setPixmap(scaled_pixmap)
 
 def main(colmap_dir: str):
     app = QApplication(sys.argv)
